@@ -1,0 +1,30 @@
+DATA INTAKE
+[n8n Web Form: Candidate Applies]
+        |
+        +--> [Google Drive: Backup CV]
+        |
+        v
+ANALYSIS
+[Extract CV Text] --> [Profile Analyzer AI] --> (Structured JSON Resume)
+                                                        |
+                                                        v
+MATCHING
+                                       [Google Sheet: Find Job Role URL]
+                                                        |
+                                                        v
+                                         [Google Drive: Download JD]
+                                                        |
+                                                        v
+EVALUATION
+(Structured Resume + JD Text) --------> [HR Expert AI Evaluator]
+                                                        |
+                                                        v
+RECORDING
+                                            [Save to ATS Google Sheet]
+                                                        |
+ROUTING
+                                     +------------------+------------------+
+                                     v                                     v
+                            [Score >= 8]                           [Score < 8]
+                                     |                                     |
+                             [Slack Message]                       [SendGrid Email]

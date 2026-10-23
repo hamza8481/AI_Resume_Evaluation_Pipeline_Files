@@ -1,0 +1,11 @@
+Setup and Deployment Instructions
+
+1. Import the Workflow: Upload Automated_Resume_Screening_Agent.json to your n8n instance.
+2. Connect Credentials:
+   a. OpenAI (for extraction and evaluation logic).
+   b. Google Drive and Google Sheets (OAuth2).
+   c. Slack and SendGrid (Optional, if using routing features).
+3. Configure Google Workspace:
+   a. Create a Google Sheet that maps Job Role to Job Description Drive URL. Update the Get position JD node with this Sheet ID.
+   b. Create an Evaluation Google Sheet with headers: full_name, email, phone, position, overall_fit_score, recommendation, strengths, concerns_or_gaps. Update the Update evaluation sheet node with this ID.
+   c. Set up a Google Drive folder for storing uploaded CVs and update the Folder ID in the Upload to Google Drive node.

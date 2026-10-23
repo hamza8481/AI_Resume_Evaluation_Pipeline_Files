@@ -1,0 +1,794 @@
+{
+  "meta": {
+    "instanceId": "system_generated_id",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Automated Resume Screening Agent",
+  "tags": [
+    "ATS",
+    "AI Agent",
+    "HR",
+    "Recruitment"
+  ],
+  "nodes": [
+    {
+      "id": "46d85862-de79-4a46-9b59-f27194375af4",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -960,
+        1936
+      ],
+      "parameters": {
+        "width": 572,
+        "height": 84,
+        "content": "1. Candidate submit application form (profile and position)"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "aa6b6b3f-58ca-4c07-8265-85e3f3278842",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        1968
+      ],
+      "parameters": {
+        "width": 440,
+        "height": 592,
+        "content": "4. HR AI Agent evaluate candidate matching based on profile and job description\n- Evaluate candidate profile against the selected position job description (download from google drive)\n- Output follow structured template (defined by JSON)"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "244d87cc-877a-4080-bb9b-6ea44aa76540",
+      "name": "Application form",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -544,
+        2096
+      ],
+      "webhookId": "hr-form-webhook-id",
+      "parameters": {
+        "options": {
+          "customCss": ":root {\n\t--font-family: 'Open Sans', sans-serif;\n\t--color-submit-btn-bg: #0000FF;\n}\n",
+          "appendAttribution": false
+        },
+        "formTitle": "Candidate Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Name"
+            },
+            {
+              "fieldType": "email",
+              "fieldLabel": "Email",
+              "placeholder": "Email"
+            },
+            {
+              "fieldType": "file",
+              "fieldLabel": "CV",
+              "requiredField": true,
+              "acceptFileTypes": ".pdf"
+            },
+            {
+              "fieldType": "dropdown",
+              "fieldLabel": "Job Role",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Talent acquisition Specialist (Intermediate)"
+                  },
+                  {
+                    "option": "Senior Tester/QC (Web Apps, Mobile, API, Database)"
+                  },
+                  {
+                    "option": "Lead Full-stack Developer (.NET, Angular/React.js)"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "formDescription": "Please, fill the required fields, and we will get in touch with you soon!"
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "abf322d8-4656-41cc-85da-6224131078fa",
+      "name": "Extract profile",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        -320,
+        2224
+      ],
+      "parameters": {
+        "options": {},
+        "operation": "pdf",
+        "binaryPropertyName": "CV"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "25ff720c-6af7-4be9-9043-1a41577c9df3",
+      "name": "json parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        64,
+        2416
+      ],
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"full_name\": \"\",\n  \"job_title\": \"\",\n  \"summary\": \"\",\n  \"contact\": {\n    \"email\": \"\",\n    \"phone\": \"\",\n    \"address\": \"\",\n    \"linkedin\": \"\",\n    \"website\": \"\"\n  },\n  \"education\": [],\n  \"certifications\": [],\n  \"work_experience\": [],\n  \"skills\": {},\n  \"projects\": [],\n  \"awards\": [],\n  \"volunteer_experience\": [],\n  \"additional_information\": {}\n}"
+      },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "54f9011b-e706-4472-b574-264836bbbedc",
+      "name": "gpt4-1 model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -64,
+        2416
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "openai_api_cred",
+          "name": "OpenAI API Key"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "f27eb081-8fe1-4a8c-88ca-1747047bf3f2",
+      "name": "Get position JD",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        304,
+        2192
+      ],
+      "parameters": {
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupValue": "={{ $('Application form').item.json['Job Role'] }}",
+              "lookupColumn": "Job Role"
+            }
+          ]
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/gsheets_positions_id/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gsheets_positions_id",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/gsheets_positions_id/edit?usp=drivesdk",
+          "cachedResultName": "Positions"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gsheets_oauth_cred",
+          "name": "Google Sheets OAuth2"
+        }
+      },
+      "typeVersion": 4.6,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "0c906e55-f6ec-44ef-b5ff-fdd1443fe079",
+      "name": "Download file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        528,
+        2192
+      ],
+      "parameters": {
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "={{ $json['Job Description'] }}"
+        },
+        "options": {},
+        "operation": "download"
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "gdrive_oauth_cred",
+          "name": "Google Drive OAuth2"
+        }
+      },
+      "typeVersion": 3
+    },
+    {
+      "id": "5a8e8116-feaa-4007-abdb-91a2a12bbce8",
+      "name": "Extract Job Description",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        752,
+        2192
+      ],
+      "parameters": {
+        "options": {},
+        "operation": "pdf"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "f9b079d1-d15c-4deb-b71f-57222761f031",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        1888
+      ],
+      "parameters": {
+        "width": 588,
+        "height": 676,
+        "content": "2. Candidate profile analyzer\n- Upload candidate profile to Google Drive folder for later processing\n- Extract candidate information from PDF file\n- Transform candidate information to expected JSON format for later use (send message, add to evaluation sheet)"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "f1dbe09a-7e98-453f-8715-afb810a769be",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        1984
+      ],
+      "parameters": {
+        "width": 636,
+        "height": 372,
+        "content": "3. Download selected job description\n- Get position name and job description URL from google sheet based on candidate application form\n- Download job description file from Google Drive\n- Extract data from job description PDF file to be used in the next steps"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "71fb65f2-972a-4dc3-8dd3-ba74b456f7fe",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1488,
+        1920
+      ],
+      "parameters": {
+        "width": 824,
+        "height": 768,
+        "content": "5. Update evaluation result to target platform\n- Candidate with overall fit score under 8 will be considered as unqualified, config in the Candidate qualified node\n- Send message to Slack, Email\n- Add new rows in CV evaluation tracking sheet (Google Drive), you need config Update evaluation sheet node with your own URL (empty sheet, column header and rows will be auto-populated)"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "b30b9cbd-bffd-4a5b-8185-3334b9b2b8ad",
+      "name": "HR Expert Agent",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        1040,
+        2192
+      ],
+      "parameters": {
+        "text": "=Evaluate the candidate for the following job:\n\n--- Job Description ---\nPosition: {{ $('Download file').item.json['Job Role'] }}\nJob Description: {{ $('Extract Job Description').item.json.text }}\n------------------------\n\nBelow is the extracted candidate profile:\n{{ $('Extract profile').item.json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional AI hiring assistant tasked with evaluating job candidates based on their structured resume data and a provided job description. Your goal is to assess the candidate suitability for the role, identifying key matches and gaps in skills, experience, and qualifications. You will receive candidate_profile (JSON) and job_description (text). Parse requirements, match profile to requirements, and provide a structured evaluation with ratings and reasoning. Always be objective and use professional language."
+            }
+          ]
+        },
+        "promptType": "define",
+        "hasOutputParser": true
+      },
+      "typeVersion": 1.5
+    },
+    {
+      "id": "1355a107-54ef-4136-9d63-d3b2a7273143",
+      "name": "Profile Analyzer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -96,
+        2192
+      ],
+      "parameters": {
+        "text": "=Please extract all relevant information from this candiadte:\nCV Content:\n===\n{{ $json[\"text\"] }}\n===",
+        "options": {
+          "systemMessage": ""
+        },
+        "promptType": "define",
+        "hasOutputParser": true
+      },
+      "typeVersion": 2.1
+    },
+    {
+      "id": "94149ee7-1845-4b7a-a2d3-09dea44b1670",
+      "name": "Update evaluation sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1808,
+        2528
+      ],
+      "parameters": {
+        "columns": {
+          "value": {},
+          "schema": [
+            {
+              "id": "overall_fit_score",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "overall_fit_score",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendation",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "recommendation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "strengths",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "strengths",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "concerns_or_gaps",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "concerns_or_gaps",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "output"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {},
+        "operation": "append",
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/gsheets_evaluation_id/edit?usp=drive_link"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gsheets_oauth_cred",
+          "name": "Google Sheets OAuth2"
+        }
+      },
+      "typeVersion": 4.6
+    },
+    {
+      "id": "3a554846-b2b7-4880-9137-103be85ea072",
+      "name": "Map Columns",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1568,
+        2192
+      ],
+      "parameters": {
+        "jsCode": "const evalResult = $input.first().json.output\nconst profile = $('Profile Analyzer Agent').first().json.output;\nreturn [\n  {\n    json: {\n      full_name:profile.full_name,\n      email: profile.contact.email,\n      phone: profile.contact.phone,\n      position: $('Application form').first().json['Job Role'],\n      overall_fit_score: evalResult.overall_fit_score,\n      recommendation: evalResult.recommendation,\n      strengths: evalResult.strengths.join(', '),\n      concerns_or_gaps: evalResult.concerns_or_gaps.join(', '),\n      final_notes: evalResult.final_notes,\n      submitted_date: $now.toFormat(\"yyyyLLdd-HHmmss\")\n    }\n  }\n];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "97f45dd9-1858-4ae3-854f-fd24404864d0",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -960,
+        2064
+      ],
+      "parameters": {
+        "width": 364,
+        "height": 468,
+        "content": "Form Preview Area"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "d014e9a0-47c0-4106-8588-a240f2faaf2e",
+      "name": "Upload to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -320,
+        2048
+      ],
+      "parameters": {
+        "name": "=cv-{{ $now.toFormat(\"yyyyLLdd-HHmmss\") }}-{{ $json.CV[0].filename }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "options": {},
+        "folderId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://drive.google.com/drive/u/0/folders/gdrive_folder_id"
+        },
+        "inputDataFieldName": "CV"
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "gdrive_oauth_cred",
+          "name": "Google Drive OAuth2"
+        }
+      },
+      "typeVersion": 3
+    },
+    {
+      "id": "0251fd30-6d6c-4df9-9bae-11f2f29947bd",
+      "name": "gpt-4-1 model 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1072,
+        2416
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "openai_api_cred",
+          "name": "OpenAI API Key"
+        }
+      },
+      "typeVersion": 1.2
+    },
+    {
+      "id": "8457927f-a7a4-458b-9bee-fa820fa60c3f",
+      "name": "json parser 2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        1200,
+        2416
+      ],
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"overall_fit_score\": 0,\n  \"recommendation\": \"\", \n  \"job_match_summary\": {},\n  \"strengths\": [],\n  \"concerns_or_gaps\": [],\n  \"final_notes\": \"\"\n}"
+      },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "cf545d77-0db6-4142-9cef-63e034f867d3",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2528,
+        1856
+      ],
+      "parameters": {
+        "width": 1520,
+        "height": 2000,
+        "content": "AI-Driven Recruitment and ATS Pipeline\n\nThis workflow automates resume screening and evaluation using AI to improve candidate processing and reduce manual HR effort.\nThis workflow is ideal for HR teams and recruiters who want to streamline candidate screening by combining form submissions, resume parsing, job description matching, and AI evaluation into a single, automated process.\n\nHow it works:\n1. A candidate submits their application using a form that includes name, email, CV (PDF), and a selected job role.\n2. The CV is uploaded to Google Drive for record-keeping and later reference.\n3. The Profile Analyzer Agent reads the uploaded resume, extracts structured candidate information, and transforms it into a standardized JSON format using GPT and a custom output parser.\n4. The corresponding job description PDF file is automatically retrieved from a Google Sheet based on the selected job role.\n5. The HR Expert Agent evaluates the candidate profile against the job description using another GPT model, generating a structured assessment that includes strengths, gaps, and an overall recommendation.\n6. The evaluation result is parsed and formatted for output.\n7. The evaluation score will be used to mark candidate as qualified or unqualified. Based on that an email will be sent to applicant or the message will be send to hiring team for the next process.\n8. The final evaluation result will be stored in a Google Sheet for long-term tracking and reporting.\n\nRequirements:\n1. OpenAI account for both Profile Analyzer and HR Expert Agents\n2. Google Drive account (for storing CVs and evaluation sheet)\n3. Google Sheets API credentials (for JD source and evaluation results)"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "cbe57cf2-3f37-4bb0-9e15-526028bdc04a",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        2384
+      ],
+      "parameters": {
+        "width": 640,
+        "height": 128,
+        "content": "Sample Extraction Display"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "baf46ccf-9906-4cfd-a1d1-bb8203294d98",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2336,
+        2176
+      ],
+      "parameters": {
+        "width": 960,
+        "height": 512,
+        "content": "Sample evaluation sheet data Display"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "21a6ab2d-be94-480b-be22-fad370f520d2",
+      "name": "Send email to candidate about the result",
+      "type": "n8n-nodes-base.sendGrid",
+      "disabled": true,
+      "position": [
+        2144,
+        2320
+      ],
+      "parameters": {
+        "subject": "=Update on Your Application for {{ $json.position }}",
+        "toEmail": "={{ $json.email }}",
+        "fromName": "Hiring Team",
+        "resource": "mail",
+        "fromEmail": "hr@example.com",
+        "contentType": "text/html",
+        "contentValue": "=<!DOCTYPE html>\n<html>\n<body>\n  <p>Hi {{ $json.full_name }},</p>\n  <p>Thank you for applying for the {{ $json.position }} position.</p>\n  <p>We appreciate your interest and the time you took to apply. After careful review, we have decided not to move forward with your application at this time.</p>\n</body>\n</html>",
+        "additionalFields": {}
+      },
+      "credentials": {
+        "sendGridApi": {
+          "id": "sendgrid_api_cred",
+          "name": "SendGrid API"
+        }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "ca4984c1-c367-4632-bb81-46565bd5e1df",
+      "name": "Send message via Slack to the hiring team",
+      "type": "n8n-nodes-base.slack",
+      "disabled": true,
+      "position": [
+        2144,
+        2080
+      ],
+      "webhookId": "slack-webhook-id",
+      "parameters": {
+        "text": "=Candidate Evaluation Update. Hi team, We have completed the initial screening and have a qualified candidate for the {{ $json.position }} position: {{ $json.full_name }}. Summary: Fit Score: {{ $json.overall_fit_score }}/10 - Recommendation: {{ $json.recommendation }} - Key Strengths: {{ $json.strengths }}. Please advise on the next steps.",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#hiring-channel"
+        },
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": {
+          "id": "slack_api_cred",
+          "name": "Slack API"
+        }
+      },
+      "typeVersion": 2.3
+    },
+    {
+      "id": "03b884bf-0aa3-4b76-8f6d-cd3664a198d0",
+      "name": "Candidate qualified?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1808,
+        2192
+      ],
+      "parameters": {
+        "options": {},
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a69c879b-ebf6-4237-b19a-4bb1e4686746",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              },
+              "leftValue": "={{ $('HR Expert Agent').item.json.output.overall_fit_score }}",
+              "rightValue": 8
+            }
+          ]
+        }
+      },
+      "typeVersion": 2.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Map Columns": {
+      "main": [
+        [
+          {
+            "node": "Update evaluation sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Candidate qualified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "json parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Profile Analyzer Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gpt4-1 model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Profile Analyzer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract Job Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "json parser 2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "HR Expert Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract profile": {
+      "main": [
+        [
+          {
+            "node": "Profile Analyzer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get position JD": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HR Expert Agent": {
+      "main": [
+        [
+          {
+            "node": "Map Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gpt-4-1 model 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "HR Expert Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Application form": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidate qualified?": {
+      "main": [
+        [
+          {
+            "node": "Send message via Slack to the hiring team",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email to candidate about the result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Profile Analyzer Agent": {
+      "main": [
+        [
+          {
+            "node": "Get position JD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Job Description": {
+      "main": [
+        [
+          {
+            "node": "HR Expert Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

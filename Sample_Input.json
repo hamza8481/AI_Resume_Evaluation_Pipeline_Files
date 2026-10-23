@@ -1,0 +1,15 @@
+{
+  "body": {
+    "Name": "Jane Doe",
+    "Email": "janedoe@example.com",
+    "Job Role": "Lead Full-stack Developer (.NET, Angular/React.js)"
+  },
+  "files": {
+    "CV": {
+      "filename": "Jane_Doe_Resume.pdf",
+      "mimeType": "application/pdf",
+      "size": 1048576,
+      "base64Data": "JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSPj4Kc3RyZWFtCg=="
+    }
+  }
+}

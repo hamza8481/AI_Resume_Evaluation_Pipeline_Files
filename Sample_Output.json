@@ -1,0 +1,12 @@
+{
+  "full_name": "Jane Doe",
+  "email": "janedoe@example.com",
+  "phone": "+1-555-0198",
+  "position": "Lead Full-stack Developer (.NET, Angular/React.js)",
+  "overall_fit_score": 9,
+  "recommendation": "Highly Recommended for Interview",
+  "strengths": "8 years of .NET Core experience, lead developer on 3 major enterprise projects, strong React.js background, excellent system design skills.",
+  "concerns_or_gaps": "No explicit mention of Angular experience (mostly React focused), though role accepts either.",
+  "final_notes": "Candidate exhibits strong leadership capabilities and deep backend knowledge. The React focus over Angular is acceptable per JD.",
+  "submitted_date": "20261024-103000"
+}
